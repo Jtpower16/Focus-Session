@@ -1,0 +1,390 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,480;9..144,600&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root {
+  --paper: #F5F6F3;
+  --ink: #1B211F;
+  --ink-soft: #55605C;
+  --ink-faint: #8B948E;
+  --line: #D8DBD6;
+  --line-strong: #B2B9B0;
+  --panel: #FFFFFF;
+  --accent: #2F6F62;
+  --accent-soft: #E4EFEC;
+  --accent-strong: #1F4F45;
+  --amber: #B9793B;
+  --amber-soft: #F6E9D9;
+  --amber-strong: #8A5A26;
+  --red: #B23B3B;
+  --red-soft: #F7E3E1;
+  --red-strong: #8A2A2A;
+  --overlay: rgba(20, 24, 22, 0.55);
+  --radius: 10px;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Work Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #14181A;
+    --ink: #E9ECE9;
+    --ink-soft: #9AA39D;
+    --ink-faint: #6B7570;
+    --line: #2A302D;
+    --line-strong: #454C47;
+    --panel: #1B2020;
+    --accent: #5FB6A1;
+    --accent-soft: #1E3430;
+    --accent-strong: #8FD1BF;
+    --amber: #E0A868;
+    --amber-soft: #3A2C18;
+    --amber-strong: #F0C592;
+    --red: #E17575;
+    --red-soft: #3A1F1F;
+    --red-strong: #F0A0A0;
+    --overlay: rgba(0, 0, 0, 0.65);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #14181A;
+  --ink: #E9ECE9;
+  --ink-soft: #9AA39D;
+  --ink-faint: #6B7570;
+  --line: #2A302D;
+  --line-strong: #454C47;
+  --panel: #1B2020;
+  --accent: #5FB6A1;
+  --accent-soft: #1E3430;
+  --accent-strong: #8FD1BF;
+  --amber: #E0A868;
+  --amber-soft: #3A2C18;
+  --amber-strong: #F0C592;
+  --red: #E17575;
+  --red-soft: #3A1F1F;
+  --red-strong: #F0A0A0;
+  --overlay: rgba(0, 0, 0, 0.65);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.app { max-width: 640px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+.header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 12px; margin-bottom: 1.75rem; }
+.header-title { grid-column: 2; text-align: center; }
+.header-title h1 { font-family: var(--font-display); font-weight: 600; font-size: 30px; letter-spacing: -0.01em; text-wrap: balance; margin: 0; }
+.header-title p { font-size: 13px; color: var(--ink-soft); margin: 4px 0 0; }
+.description-row { margin: 0 0 1.1rem; }
+.desc-input { width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); color: var(--ink); font-family: var(--font-body); font-size: 13.5px; padding: 9px 12px; outline: none; }
+.desc-input::placeholder { color: var(--ink-faint); }
+.desc-input:focus { border-color: var(--accent); }
+.guidelines-wrap { grid-column: 3; justify-self: end; position: relative; }
+button { font-family: var(--font-body); }
+.guidelines-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: var(--radius); font-size: 13px; cursor: pointer; background: var(--panel); color: var(--ink-soft); border: 1px solid var(--line-strong); }
+.guidelines-btn:hover { border-color: var(--accent); color: var(--ink); }
+.guidelines-btn:focus-visible, .link-btn:focus-visible, .timer-btns button:focus-visible, .break-btns button:focus-visible, .checklist-toggle:focus-visible, textarea:focus-visible, .checklist-item input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dropdown-backdrop { display: none; position: fixed; inset: 0; background: var(--overlay); z-index: 99; }
+.dropdown-backdrop.open { display: block; }
+.dropdown { display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 360px; max-width: 88vw; background: var(--panel); border: 1px solid var(--line-strong); border-radius: 12px; padding: 1.1rem 1.3rem; z-index: 100; max-height: 80vh; overflow-y: auto; box-shadow: 0 12px 32px rgba(0,0,0,0.28); }
+.dropdown.open { display: block; }
+.dropdown h3 { font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--ink); margin: 0 0 12px; }
+.dropdown ol { margin: 0; padding-left: 1.15rem; }
+.dropdown li { font-size: 13px; color: var(--ink-soft); line-height: 1.65; margin-bottom: 7px; }
+.dropdown .note { font-size: 12.5px; color: var(--ink-faint); margin-top: 10px; border-top: 1px solid var(--line); padding-top: 10px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.card { background: var(--panel); border: 1.5px solid var(--line-strong); border-radius: 12px; padding: 1.1rem 1.25rem; }
+.card-label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-soft); margin-bottom: 10px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+.card-label svg { color: var(--ink-faint); flex-shrink: 0; }
+textarea { width: 100%; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.6; padding: 9px 11px; resize: none; outline: none; }
+textarea:focus { border-color: var(--accent); }
+.timer-display { font-family: var(--font-mono); font-size: 40px; font-weight: 500; color: var(--ink); text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -0.5px; margin: 4px 0 4px; }
+.timer-sub { font-size: 12px; color: var(--ink-faint); text-align: center; margin-bottom: 12px; min-height: 16px; }
+.timer-btns { display: flex; gap: 6px; }
+.timer-btns button { flex: 1; padding: 8px 4px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
+.btn-start { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent) !important; }
+.btn-start.running { background: var(--amber-soft); color: var(--amber-strong); border-color: var(--amber) !important; }
+.btn-end { background: var(--red-soft); color: var(--red-strong); border-color: var(--red) !important; }
+.btn-end:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-reset:hover { border-color: var(--line-strong); }
+.break-panel { margin-top: 10px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius); padding: 11px 13px; display: none; }
+.break-panel.visible { display: block; }
+.break-title { font-size: 12px; font-weight: 500; color: var(--accent-strong); margin-bottom: 4px; }
+.break-timer { font-family: var(--font-mono); font-size: 21px; font-weight: 500; color: var(--accent-strong); font-variant-numeric: tabular-nums; margin-bottom: 8px; }
+.break-activity { font-size: 12px; color: var(--accent-strong); margin-bottom: 8px; opacity: 0.9; min-height: 16px; }
+.break-btns { display: flex; gap: 6px; }
+.break-btns button { flex: 1; padding: 7px; border-radius: var(--radius); font-size: 12px; cursor: pointer; background: var(--panel); color: var(--ink); border: 1px solid var(--line); }
+.break-btns button:hover { border-color: var(--line-strong); }
+.brainfm-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.link-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 13px; border-radius: var(--radius); font-size: 13px; cursor: pointer; text-decoration: none; border: 1px solid var(--line-strong); background: var(--paper); color: var(--ink); }
+.link-btn:hover { border-color: var(--accent); color: var(--accent-strong); }
+.session-label { font-size: 11px; color: var(--ink-faint); margin-top: 6px; min-height: 14px; }
+.checklist-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; background: none; border: none; cursor: pointer; font-size: 12px; color: var(--ink-soft); padding: 0 0 9px; }
+.checklist-toggle svg.chev { transition: transform 0.15s; }
+.checklist-toggle.open svg.chev { transform: rotate(180deg); }
+.checklist-panel { display: none; margin-bottom: 10px; }
+.checklist-panel.open { display: block; }
+.checklist-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--ink-soft); padding: 4px 0; cursor: pointer; line-height: 1.4; }
+.checklist-item input { cursor: pointer; margin-top: 2px; }
+.checklist-hint { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <h2 class="sr-only">Focus session tool: a stopwatch with a break timer, a current assignment and distraction log, a studying protocol in the guidelines drawer, and a brain.fm link.</h2>
+  <div class="header">
+    <div class="header-title">
+      <h1>Focus session</h1>
+      <p>One task at a time.</p>
+    </div>
+    <div class="guidelines-wrap">
+      <button class="guidelines-btn" onclick="toggleDropdown()" aria-haspopup="dialog" aria-expanded="false" id="guidelinesBtn">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 7 5 9 9 5"></polyline><line x1="12" y1="7" x2="21" y2="7"></line><polyline points="3 16 5 18 9 14"></polyline><line x1="12" y1="17" x2="21" y2="17"></line></svg>
+        Guidelines
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="dropdown-backdrop" id="dropdownBackdrop" onclick="toggleDropdown()"></div>
+      <div class="dropdown" id="dropdown" role="dialog" aria-label="Guidelines">
+        <h3>Studying (procrastination) protocol</h3>
+        <ol>
+          <li>Make a list and break it into actionable tasks. Set one measurable goal for this session.</li>
+          <li>Use the distraction sheet to log anything distracting - use it for urge surfing: sit with the thought, don't act on it.</li>
+          <li>Work 20-50 minutes. Break should be about a third to a quarter of your work time. No social media or music during the break.</li>
+          <li>Start the timer and sit in silence for 1 minute. Process any negative emotions while keeping the task in mind.</li>
+          <li>Minimal viable goal: commit to the task for just 1 minute. You can stop after - use the unfinished work incentive to keep going.</li>
+        </ol>
+        <div class="note">If you're tired, take a 20-minute nap instead of pushing through.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="description-row">
+    <label for="sessionDesc" class="sr-only">Session description</label>
+    <input type="text" id="sessionDesc" class="desc-input" placeholder="What's this session about? (optional)">
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-label">Current assignment</div>
+      <textarea id="assignment" rows="5" placeholder="What are you working on right now?"></textarea>
+    </div>
+    <div class="card">
+      <div class="card-label">Distraction log</div>
+      <textarea id="distractions" rows="5" placeholder="Capture distracting thoughts here - deal with them later."></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+        Stopwatch
+      </div>
+      <div class="timer-display" id="timer">00:00:00</div>
+      <div class="timer-sub" id="timerSub"></div>
+
+      <button class="checklist-toggle" id="checklistToggle" onclick="toggleChecklist()" aria-expanded="false">
+        <span style="display:flex; align-items:center; gap:6px;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="12" height="16" rx="2"></rect><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"></path><polyline points="9 13 11 15 15 10.5"></polyline></svg>
+          Pre-start checklist (<span id="checklistCount">0</span>/4)
+        </span>
+        <svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="checklist-panel" id="checklistPanel">
+        <label class="checklist-item"><input type="checkbox" class="prereq-check" onchange="updateChecklist()"> Closed distracting tabs/apps (Discord, LinkedIn, Gmail, Messages)</label>
+        <label class="checklist-item"><input type="checkbox" class="prereq-check" onchange="updateChecklist()"> Set one measurable goal for this session</label>
+        <label class="checklist-item"><input type="checkbox" class="prereq-check" onchange="updateChecklist()"> Phone silenced and out of reach</label>
+        <label class="checklist-item"><input type="checkbox" class="prereq-check" onchange="updateChecklist()"> Used the restroom and filled up water</label>
+        <div class="checklist-hint" id="checklistHint">Check all items to enable Start.</div>
+      </div>
+
+      <div class="timer-btns">
+        <button class="btn-start" id="startBtn" onclick="toggleTimer()" disabled>Start</button>
+        <button class="btn-end" id="endBtn" onclick="endSession()" disabled>End</button>
+        <button class="btn-reset" onclick="resetAll()">Reset</button>
+      </div>
+      <div class="session-label" id="sessionLabel"></div>
+
+      <div class="break-panel" id="breakPanel">
+        <div class="break-title">Break time</div>
+        <div class="break-timer" id="breakTimer">00:00</div>
+        <div class="break-activity" id="breakActivity"></div>
+        <div class="break-btns">
+          <button id="breakStartBtn" onclick="toggleBreak()">Start break</button>
+          <button onclick="nextActivity()">New activity</button>
+          <button onclick="resetAll()">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l11-2v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="17" cy="16" r="3"></circle></svg>
+        Brain.fm
+      </div>
+      <div class="brainfm-row">
+        <a class="link-btn" href="https://www.youtube.com/results?search_query=brain.fm+focus+music" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="4"></rect><polygon points="10.5 9.5 15.5 12 10.5 14.5" fill="currentColor" stroke="none"></polygon></svg>
+          YouTube
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let running = false, interval = null, sessionStart = null, elapsed = 0, startedAt = null;
+let breakRunning = false, breakInterval = null, breakRemaining = 0, breakStartedAt = null, breakElapsed = 0;
+const activities = [
+  "Go for a short walk outside",
+  "Doodle or sketch something",
+  "Do some light stretching",
+  "Make a cup of tea or water",
+  "Do 10 deep breaths slowly",
+  "Look out a window for a few minutes",
+  "Tidy your desk or workspace",
+  "Do a few jumping jacks",
+  "Close your eyes and rest quietly",
+  "Grab a healthy snack"
+];
+let activityIdx = Math.floor(Math.random() * activities.length);
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function updateDisplay() {
+  const total = running ? elapsed + (Date.now() - startedAt) : elapsed;
+  const ms = Math.floor(total / 1000);
+  const h = Math.floor(ms / 3600), m = Math.floor((ms % 3600) / 60), s = ms % 60;
+  document.getElementById('timer').textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+}
+
+function toggleTimer() {
+  const btn = document.getElementById('startBtn');
+  if (!running) {
+    running = true;
+    startedAt = Date.now();
+    if (!sessionStart) {
+      sessionStart = new Date();
+      document.getElementById('sessionLabel').textContent = 'Started at ' + sessionStart.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    }
+    interval = setInterval(updateDisplay, 500);
+    btn.textContent = 'Pause';
+    btn.classList.add('running');
+    document.getElementById('endBtn').disabled = false;
+    document.getElementById('timerSub').textContent = 'Session in progress';
+  } else {
+    running = false;
+    elapsed += Date.now() - startedAt;
+    clearInterval(interval);
+    updateDisplay();
+    btn.textContent = 'Resume';
+    btn.classList.remove('running');
+    document.getElementById('timerSub').textContent = 'Paused';
+  }
+}
+
+function endSession() {
+  if (running) {
+    running = false;
+    elapsed += Date.now() - startedAt;
+    clearInterval(interval);
+  }
+  updateDisplay();
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('endBtn').disabled = true;
+  document.getElementById('startBtn').textContent = 'Done';
+  document.getElementById('startBtn').classList.remove('running');
+
+  const workSecs = Math.floor(elapsed / 1000);
+  const breakSecs = Math.round(workSecs / 3);
+  breakRemaining = breakSecs;
+  breakElapsed = 0;
+
+  const bm = Math.floor(breakSecs / 60), bs = breakSecs % 60;
+  document.getElementById('timerSub').textContent = 'Session ended';
+  document.getElementById('breakTimer').textContent = pad(bm) + ':' + pad(bs);
+  document.getElementById('breakActivity').textContent = '→ ' + activities[activityIdx];
+  document.getElementById('breakPanel').classList.add('visible');
+}
+
+function updateBreakDisplay() {
+  const spent = breakRunning ? breakElapsed + Math.floor((Date.now() - breakStartedAt) / 1000) : breakElapsed;
+  const remaining = Math.max(0, breakRemaining - spent);
+  const bm = Math.floor(remaining / 60), bs = remaining % 60;
+  document.getElementById('breakTimer').textContent = pad(bm) + ':' + pad(bs);
+  if (remaining <= 0) {
+    clearInterval(breakInterval);
+    breakRunning = false;
+    document.getElementById('breakStartBtn').textContent = 'Break done!';
+    document.getElementById('breakActivity').textContent = 'Break over - great work.';
+  }
+}
+
+function toggleBreak() {
+  const btn = document.getElementById('breakStartBtn');
+  if (!breakRunning) {
+    breakRunning = true;
+    breakStartedAt = Date.now();
+    breakInterval = setInterval(updateBreakDisplay, 500);
+    btn.textContent = 'Pause break';
+  } else {
+    breakRunning = false;
+    breakElapsed += Math.floor((Date.now() - breakStartedAt) / 1000);
+    clearInterval(breakInterval);
+    btn.textContent = 'Resume break';
+  }
+}
+
+function nextActivity() {
+  activityIdx = (activityIdx + 1) % activities.length;
+  document.getElementById('breakActivity').textContent = '→ ' + activities[activityIdx];
+}
+
+function resetAll() {
+  running = false; breakRunning = false;
+  clearInterval(interval); clearInterval(breakInterval);
+  elapsed = 0; startedAt = null; sessionStart = null;
+  breakRemaining = 0; breakElapsed = 0; breakStartedAt = null;
+  updateDisplay();
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('startBtn').textContent = 'Start';
+  document.getElementById('startBtn').classList.remove('running');
+  document.getElementById('endBtn').disabled = true;
+  document.getElementById('timerSub').textContent = '';
+  document.getElementById('sessionLabel').textContent = '';
+  document.getElementById('breakPanel').classList.remove('visible');
+  document.getElementById('breakStartBtn').textContent = 'Start break';
+  activityIdx = Math.floor(Math.random() * activities.length);
+  document.querySelectorAll('.prereq-check').forEach(cb => cb.checked = false);
+  document.getElementById('checklistCount').textContent = '0';
+  document.getElementById('checklistHint').textContent = 'Check all items to enable Start.';
+  document.getElementById('startBtn').disabled = true;
+}
+
+function toggleDropdown() {
+  const open = document.getElementById('dropdown').classList.toggle('open');
+  document.getElementById('dropdownBackdrop').classList.toggle('open');
+  document.getElementById('guidelinesBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.querySelector('.guidelines-wrap');
+  const dropdown = document.getElementById('dropdown');
+  if (!wrap.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.remove('open');
+    document.getElementById('dropdownBackdrop').classList.remove('open');
+    document.getElementById('guidelinesBtn').setAttribute('aria-expanded', 'false');
+  }
+});
+
+function toggleChecklist() {
+  const open = document.getElementById('checklistPanel').classList.toggle('open');
+  document.getElementById('checklistToggle').classList.toggle('open');
+  document.getElementById('checklistToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function updateChecklist() {
+  const boxes = document.querySelectorAll('.prereq-check');
+  const checked = document.querySelectorAll('.prereq-check:checked').length;
+  document.getElementById('checklistCount').textContent = checked;
+  const allChecked = checked === boxes.length;
+  document.getElementById('checklistHint').textContent = allChecked ? 'All set - you can start.' : 'Check all items to enable Start.';
+  if (!document.getElementById('startBtn').classList.contains('running') && document.getElementById('startBtn').textContent !== 'Done' && document.getElementById('startBtn').textContent !== 'Pause') {
+    document.getElementById('startBtn').disabled = !allChecked;
+  }
+}
+</script>
