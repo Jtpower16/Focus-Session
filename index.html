@@ -1,3 +1,4 @@
+<title>Focus session</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,480;9..144,600&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
 :root {
@@ -79,7 +80,7 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
 button { font-family: var(--font-body); }
 .guidelines-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: var(--radius); font-size: 13px; cursor: pointer; background: var(--panel); color: var(--ink-soft); border: 1px solid var(--line-strong); }
 .guidelines-btn:hover { border-color: var(--accent); color: var(--ink); }
-.guidelines-btn:focus-visible, .link-btn:focus-visible, .timer-btns button:focus-visible, .break-btns button:focus-visible, .checklist-toggle:focus-visible, textarea:focus-visible, .checklist-item input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.guidelines-btn:focus-visible, .link-btn:focus-visible, .timer-btns button:focus-visible, .break-btns button:focus-visible, .checklist-toggle:focus-visible, textarea:focus-visible, .checklist-item input:focus-visible, .icon-btn:focus-visible, .seg button:focus-visible, .carry-btn:focus-visible, .task input[type=checkbox]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .dropdown-backdrop { display: none; position: fixed; inset: 0; background: var(--overlay); z-index: 99; }
 .dropdown-backdrop.open { display: block; }
 .dropdown { display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 360px; max-width: 88vw; background: var(--panel); border: 1px solid var(--line-strong); border-radius: 12px; padding: 1.1rem 1.3rem; z-index: 100; max-height: 80vh; overflow-y: auto; box-shadow: 0 12px 32px rgba(0,0,0,0.28); }
@@ -89,17 +90,85 @@ button { font-family: var(--font-body); }
 .dropdown li { font-size: 13px; color: var(--ink-soft); line-height: 1.65; margin-bottom: 7px; }
 .dropdown .note { font-size: 12.5px; color: var(--ink-faint); margin-top: 10px; border-top: 1px solid var(--line); padding-top: 10px; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.card { background: var(--panel); border: 1.5px solid var(--line-strong); border-radius: 12px; padding: 1.1rem 1.25rem; }
+.card { background: var(--panel); border: 1.5px solid var(--line-strong); border-radius: 12px; padding: 1.1rem 1.25rem; min-width: 0; }
+.card-wide { grid-column: 1 / -1; }
 .card-label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-soft); margin-bottom: 10px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
 .card-label svg { color: var(--ink-faint); flex-shrink: 0; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.card-head .card-label { margin-bottom: 0; }
+#taskRoot { max-height: 340px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding-right: 6px; margin-right: -6px; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+#taskRoot::-webkit-scrollbar { width: 8px; }
+#taskRoot::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 99px; }
+#taskRoot::-webkit-scrollbar-track { background: transparent; }
 textarea { width: 100%; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.6; padding: 9px 11px; resize: none; outline: none; }
 textarea:focus { border-color: var(--accent); }
-.timer-display { font-family: var(--font-mono); font-size: 40px; font-weight: 500; color: var(--ink); text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -0.5px; margin: 4px 0 4px; }
+
+/* Tasks */
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: var(--radius); overflow: hidden; }
+.seg button { border: none; background: var(--paper); color: var(--ink-soft); font-size: 12px; padding: 6px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-strong); font-weight: 500; }
+.day-line { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 7px; }
+.day-line strong { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--ink); }
+.progress { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
+.progress > div { height: 100%; width: 0; background: var(--accent); transition: width 0.2s; }
+.section { border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); margin-bottom: 10px; }
+.section-head { display: flex; align-items: center; gap: 4px; padding: 5px 6px 5px 4px; }
+.section-count { font-size: 11.5px; color: var(--ink-faint); font-family: var(--font-mono); flex-shrink: 0; }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; background: none; border: none; color: var(--ink-faint); cursor: pointer; padding: 5px; border-radius: 6px; flex-shrink: 0; }
+.icon-btn:hover { color: var(--ink); background: var(--line); }
+.icon-btn.armed { color: var(--red-strong); background: var(--red-soft); }
+.chev-btn svg { transition: transform 0.15s; }
+.section.collapsed .chev-btn svg { transform: rotate(-90deg); }
+.section.collapsed .task-list { display: none; }
+.plain-input { flex: 1; width: 100%; min-width: 0; background: transparent; border: 1px solid transparent; border-radius: 6px; color: var(--ink); font-family: var(--font-body); font-size: 13.5px; padding: 4px 6px; outline: none; }
+.plain-input:hover { border-color: var(--line); }
+.plain-input:focus { border-color: var(--accent); background: var(--panel); }
+.plain-input::placeholder { color: var(--ink-faint); }
+.section-title { font-weight: 600; }
+.task-list { padding: 0 8px 8px 30px; }
+.task { display: flex; align-items: center; gap: 6px; }
+.task input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; cursor: pointer; flex-shrink: 0; }
+.task.done .plain-input { text-decoration: line-through; color: var(--ink-faint); }
+.task .icon-btn { opacity: 0; }
+.task:hover .icon-btn, .task:focus-within .icon-btn { opacity: 1; }
+@media (hover: none) { .task .icon-btn { opacity: 1; } }
+.add-input { font-size: 13px; margin-top: 2px; }
+.carry-btn { width: 100%; padding: 9px 12px; margin-bottom: 10px; border-radius: var(--radius); border: 1px dashed var(--accent); background: var(--accent-soft); color: var(--accent-strong); font-size: 13px; cursor: pointer; }
+.empty-hint { font-size: 12.5px; color: var(--ink-faint); margin-bottom: 8px; }
+
+/* History */
+.hist-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.stat { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; }
+.stat b { display: block; font-family: var(--font-mono); font-size: 18px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.stat span { font-size: 10.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; }
+.bars { display: flex; align-items: flex-end; gap: 4px; height: 56px; }
+.bars div { flex: 1; min-height: 2px; background: var(--accent); border-radius: 3px 3px 0 0; }
+.bars div.zero { background: var(--line); }
+.bars-label { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-faint); margin: 4px 0 12px; }
+.hist-day { border-top: 1px solid var(--line); }
+.hist-day summary { display: flex; justify-content: space-between; gap: 8px; padding: 9px 2px; font-size: 13px; cursor: pointer; list-style: none; }
+.hist-day summary::-webkit-details-marker { display: none; }
+.hist-day summary span:last-child { color: var(--ink-faint); font-family: var(--font-mono); font-size: 12px; }
+.hist-body { padding: 0 2px 10px; }
+.hist-sec { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin: 6px 0 2px; }
+.hist-task { font-size: 12.5px; color: var(--ink); padding: 1px 0 1px 18px; position: relative; }
+.hist-task::before { position: absolute; left: 2px; }
+.hist-task.done::before { content: '\2713'; color: var(--accent); }
+.hist-task.open { color: var(--ink-faint); }
+.hist-task.open::before { content: '\25CB'; }
+.hist-task time { color: var(--ink-faint); font-family: var(--font-mono); font-size: 11px; margin-left: 6px; }
+
+/* Stopwatch */
+.timer-display { font-family: var(--font-mono); font-size: 40px; font-weight: 500; color: var(--ink); text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -0.5px; margin: 4px 0 4px; transition: color 0.3s; }
+.timer-display.cue-min { color: var(--accent); }
+.timer-display.cue-max { color: var(--amber); }
 .timer-sub { font-size: 12px; color: var(--ink-faint); text-align: center; margin-bottom: 12px; min-height: 16px; }
 .timer-btns { display: flex; gap: 6px; }
 .timer-btns button { flex: 1; padding: 8px 4px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
 .btn-start { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent) !important; }
 .btn-start.running { background: var(--amber-soft); color: var(--amber-strong); border-color: var(--amber) !important; }
+.btn-start:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-end { background: var(--red-soft); color: var(--red-strong); border-color: var(--red) !important; }
 .btn-end:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-reset:hover { border-color: var(--line-strong); }
@@ -123,11 +192,20 @@ textarea:focus { border-color: var(--accent); }
 .checklist-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--ink-soft); padding: 4px 0; cursor: pointer; line-height: 1.4; }
 .checklist-item input { cursor: pointer; margin-top: 2px; }
 .checklist-hint { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
+
+@media (max-width: 560px) {
+  .app { padding: 1.5rem 1rem 2.5rem; }
+  .grid { grid-template-columns: 1fr; }
+  .header { grid-template-columns: 1fr auto; }
+  .header-title { grid-column: 1; text-align: left; }
+  .guidelines-wrap { grid-column: 2; }
+  .task-list { padding-left: 22px; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
 <div class="app">
-  <h2 class="sr-only">Focus session tool: a stopwatch with a break timer, a current assignment and distraction log, a studying protocol in the guidelines drawer, and a brain.fm link.</h2>
+  <h2 class="sr-only">Focus session tool: a daily task checklist with history, a stopwatch with a break timer, a distraction log, a studying protocol in the guidelines drawer, and a brain.fm link.</h2>
   <div class="header">
     <div class="header-title">
       <h1>Focus session</h1>
@@ -160,13 +238,18 @@ textarea:focus { border-color: var(--accent); }
   </div>
 
   <div class="grid">
-    <div class="card">
-      <div class="card-label">Current assignment</div>
-      <textarea id="assignment" rows="5" placeholder="What are you working on right now?"></textarea>
-    </div>
-    <div class="card">
-      <div class="card-label">Distraction log</div>
-      <textarea id="distractions" rows="5" placeholder="Capture distracting thoughts here - deal with them later."></textarea>
+    <div class="card card-wide">
+      <div class="card-head">
+        <div class="card-label">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 7 5 9 9 5"></polyline><line x1="12" y1="7" x2="21" y2="7"></line><polyline points="3 16 5 18 9 14"></polyline><line x1="12" y1="17" x2="21" y2="17"></line></svg>
+          Tasks
+        </div>
+        <div class="seg" role="group" aria-label="Task view">
+          <button id="viewToday" aria-pressed="true" onclick="setView('today')">Today</button>
+          <button id="viewHistory" aria-pressed="false" onclick="setView('history')">History</button>
+        </div>
+      </div>
+      <div id="taskRoot"></div>
     </div>
 
     <div class="card">
@@ -175,7 +258,7 @@ textarea:focus { border-color: var(--accent); }
         Stopwatch
       </div>
       <div class="timer-display" id="timer">00:00:00</div>
-      <div class="timer-sub" id="timerSub"></div>
+      <div class="timer-sub" id="timerSub" aria-live="polite"></div>
 
       <button class="checklist-toggle" id="checklistToggle" onclick="toggleChecklist()" aria-expanded="false">
         <span style="display:flex; align-items:center; gap:6px;">
@@ -212,6 +295,11 @@ textarea:focus { border-color: var(--accent); }
     </div>
 
     <div class="card">
+      <div class="card-label"><label for="distractions">Distraction log</label></div>
+      <textarea id="distractions" rows="9" placeholder="Capture distracting thoughts here - deal with them later."></textarea>
+    </div>
+
+    <div class="card card-wide">
       <div class="card-label">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l11-2v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="17" cy="16" r="3"></circle></svg>
         Brain.fm
@@ -227,7 +315,287 @@ textarea:focus { border-color: var(--accent); }
 </div>
 
 <script>
+/* ---------- Storage ---------- */
+const STORE_KEY = 'focusSession.v1';
+const BASE_TITLE = 'Focus session';
+function loadStore() {
+  const blank = { days: {}, distractions: '', desc: '' };
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (s && typeof s === 'object') return Object.assign(blank, s);
+  } catch (e) {}
+  return blank;
+}
+let store = loadStore();
+function saveStore() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {} }
+
+/* ---------- Helpers ---------- */
+function pad(n) { return String(n).padStart(2, '0'); }
+function dateKey(d) { d = d || new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function keyToDate(k) { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+function fmtDay(k, opts) { return keyToDate(k).toLocaleDateString([], opts || { weekday: 'short', month: 'short', day: 'numeric' }); }
+function fmtDur(secs) { const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60); return h ? h + 'h ' + m + 'm' : m + 'm'; }
+function fmtClock(secs) { const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60; return (h ? h + ':' + pad(m) : pad(m)) + ':' + pad(s); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function getDay(k, create) {
+  if (!store.days[k] && create) store.days[k] = { sections: [], focusSecs: 0, sessions: 0 };
+  return store.days[k];
+}
+function countSec(sec) {
+  let total = 0, done = 0;
+  sec.tasks.forEach(t => { if (!t.text.trim()) return; total++; if (t.done) done++; });
+  return { total, done };
+}
+function countDay(day) {
+  let total = 0, done = 0;
+  if (day) day.sections.forEach(s => { const c = countSec(s); total += c.total; done += c.done; });
+  return { total, done };
+}
+function el(tag, props, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v == null) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k === 'checked' || k === 'value') n[k] = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  kids.flat().forEach(c => { if (c != null) n.append(c); });
+  return n;
+}
+const ICONS = {
+  chev: '<polyline points="6 9 12 15 18 9"></polyline>',
+  x: '<line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line>'
+};
+function icon(name, size) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  s.setAttribute('viewBox', '0 0 24 24');
+  s.setAttribute('width', size || 13); s.setAttribute('height', size || 13);
+  s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor'); s.setAttribute('stroke-width', '2');
+  s.setAttribute('stroke-linecap', 'round'); s.setAttribute('stroke-linejoin', 'round'); s.setAttribute('aria-hidden', 'true');
+  s.innerHTML = ICONS[name];
+  return s;
+}
+
+/* ---------- Sound and notifications ---------- */
+let audioCtx = null;
+function unlockAudio() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) {}
+}
+function chime(count) {
+  if (!audioCtx) return;
+  try {
+    const t0 = audioCtx.currentTime;
+    for (let i = 0; i < (count || 1); i++) {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      const t = t0 + i * 0.35;
+      o.type = 'sine'; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t); o.stop(t + 0.32);
+    }
+  } catch (e) {}
+}
+function askNotify() { try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {} }
+function notify(title, body) { try { if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body }); } catch (e) {} }
+
+/* ---------- Tasks ---------- */
+let view = 'today', focusAfter = null, renderedKey = null;
+
+function setView(v) {
+  view = v;
+  document.getElementById('viewToday').setAttribute('aria-pressed', v === 'today');
+  document.getElementById('viewHistory').setAttribute('aria-pressed', v === 'history');
+  renderTasks();
+}
+
+function renderTasks() {
+  const root = document.getElementById('taskRoot');
+  renderedKey = dateKey();
+  root.replaceChildren(view === 'today' ? renderToday() : renderHistory());
+  if (focusAfter) {
+    const t = root.querySelector('[data-add="' + focusAfter + '"]');
+    if (t) t.focus();
+    focusAfter = null;
+  }
+}
+
+function updateCounts() {
+  const day = getDay(dateKey(), false);
+  const c = countDay(day);
+  const dc = document.getElementById('dayCount');
+  if (!dc) return;
+  dc.textContent = c.total ? c.done + ' of ' + c.total + ' done' : 'No tasks yet';
+  document.getElementById('dayBar').style.width = c.total ? (c.done / c.total * 100) + '%' : '0';
+  if (day) day.sections.forEach(s => {
+    const n = document.querySelector('[data-sec="' + s.id + '"] .section-count');
+    if (n) { const sc = countSec(s); n.textContent = sc.done + '/' + sc.total; }
+  });
+}
+
+function carrySource(today) {
+  const keys = Object.keys(store.days).filter(k => k < today && countDay(store.days[k]).total > 0).sort();
+  if (!keys.length) return null;
+  const k = keys[keys.length - 1], c = countDay(store.days[k]);
+  return c.total > c.done ? { k, n: c.total - c.done } : null;
+}
+
+function carryOver(fromKey) {
+  const d = getDay(dateKey(), true);
+  store.days[fromKey].sections.forEach(s => {
+    const open = s.tasks.filter(t => !t.done && t.text.trim());
+    if (open.length) d.sections.push({ id: uid(), title: s.title, collapsed: false,
+      tasks: open.map(t => ({ id: uid(), text: t.text, done: false, doneAt: null })) });
+  });
+  saveStore(); renderTasks();
+}
+
+function renderToday() {
+  const k = dateKey(), day = getDay(k, false), frag = document.createDocumentFragment();
+  frag.append(el('div', { class: 'day-line' },
+    el('strong', { text: fmtDay(k, { weekday: 'long', month: 'short', day: 'numeric' }) }),
+    el('span', { id: 'dayCount' })));
+  frag.append(el('div', { class: 'progress', 'aria-hidden': 'true' }, el('div', { id: 'dayBar' })));
+
+  if (!day || !day.sections.length) {
+    const prev = carrySource(k);
+    if (prev) frag.append(el('button', { class: 'carry-btn', onclick: () => carryOver(prev.k) },
+      'Carry over ' + prev.n + ' unfinished task' + (prev.n > 1 ? 's' : '') + ' from ' + fmtDay(prev.k)));
+    else frag.append(el('div', { class: 'empty-hint', text: 'Add a section below (a class or project), then break it into tasks you can check off.' }));
+  } else {
+    day.sections.forEach(sec => frag.append(renderSection(sec)));
+  }
+
+  frag.append(el('input', { class: 'plain-input add-input', placeholder: '+ New section (e.g., ICS homework), press Enter', 'aria-label': 'New section name',
+    onkeydown: e => {
+      if (e.key !== 'Enter' || !e.target.value.trim()) return;
+      const s = { id: uid(), title: e.target.value.trim(), collapsed: false, tasks: [] };
+      getDay(dateKey(), true).sections.push(s);
+      saveStore(); focusAfter = s.id; renderTasks();
+    } }));
+  setTimeout(updateCounts, 0);
+  return frag;
+}
+
+function renderSection(sec) {
+  const wrap = el('div', { class: 'section' + (sec.collapsed ? ' collapsed' : ''), 'data-sec': sec.id });
+  const chev = el('button', { class: 'icon-btn chev-btn', 'aria-label': 'Collapse or expand section', 'aria-expanded': String(!sec.collapsed),
+    onclick: () => {
+      sec.collapsed = !sec.collapsed; saveStore();
+      wrap.classList.toggle('collapsed', sec.collapsed);
+      chev.setAttribute('aria-expanded', String(!sec.collapsed));
+    } }, icon('chev'));
+  const title = el('input', { class: 'plain-input section-title', value: sec.title, 'aria-label': 'Section name',
+    oninput: e => { sec.title = e.target.value; saveStore(); } });
+  const del = el('button', { class: 'icon-btn', 'aria-label': 'Delete section', title: 'Delete section',
+    onclick: () => {
+      if (sec.tasks.length && !del.dataset.armed) {
+        del.dataset.armed = '1'; del.classList.add('armed'); del.title = 'Click again to delete section and its tasks';
+        setTimeout(() => { delete del.dataset.armed; del.classList.remove('armed'); del.title = 'Delete section'; }, 2500);
+        return;
+      }
+      const d = getDay(dateKey(), false);
+      d.sections = d.sections.filter(s => s !== sec);
+      saveStore(); renderTasks();
+    } }, icon('x'));
+  wrap.append(el('div', { class: 'section-head' }, chev, title, el('span', { class: 'section-count' }), del));
+
+  const list = el('div', { class: 'task-list' });
+  sec.tasks.forEach(t => {
+    const row = el('div', { class: 'task' + (t.done ? ' done' : '') });
+    row.append(
+      el('input', { type: 'checkbox', checked: t.done, 'aria-label': 'Mark done',
+        onchange: e => { t.done = e.target.checked; t.doneAt = t.done ? Date.now() : null; saveStore(); row.classList.toggle('done', t.done); updateCounts(); } }),
+      el('input', { class: 'plain-input', value: t.text, 'aria-label': 'Task',
+        oninput: e => { t.text = e.target.value; saveStore(); updateCounts(); },
+        onkeydown: e => { if (e.key === 'Enter') { e.preventDefault(); const a = list.querySelector('[data-add]'); if (a) a.focus(); } } }),
+      el('button', { class: 'icon-btn', 'aria-label': 'Delete task', title: 'Delete task',
+        onclick: () => { sec.tasks = sec.tasks.filter(z => z !== t); saveStore(); renderTasks(); } }, icon('x', 12))
+    );
+    list.append(row);
+  });
+  list.append(el('input', { class: 'plain-input add-input', placeholder: '+ Add task, press Enter', 'aria-label': 'Add task', 'data-add': sec.id,
+    onkeydown: e => {
+      if (e.key !== 'Enter' || !e.target.value.trim()) return;
+      sec.tasks.push({ id: uid(), text: e.target.value.trim(), done: false, doneAt: null });
+      saveStore(); focusAfter = sec.id; renderTasks();
+    } }));
+  wrap.append(list);
+  return wrap;
+}
+
+function renderHistory() {
+  const frag = document.createDocumentFragment(), today = dateKey();
+  const days = [];
+  for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(dateKey(d)); }
+  const doneCounts = days.map(k => countDay(store.days[k]).done);
+  const last7 = days.slice(-7);
+  const done7 = last7.reduce((a, k) => a + countDay(store.days[k]).done, 0);
+  const focus7 = last7.reduce((a, k) => a + ((store.days[k] && store.days[k].focusSecs) || 0), 0);
+  let streak = 0;
+  const cur = new Date();
+  if (!countDay(store.days[today]).done) cur.setDate(cur.getDate() - 1);
+  while (countDay(store.days[dateKey(cur)]).done) { streak++; cur.setDate(cur.getDate() - 1); }
+
+  const stat = (v, l) => el('div', { class: 'stat' }, el('b', { text: v }), el('span', { text: l }));
+  frag.append(el('div', { class: 'hist-stats' },
+    stat(String(done7), 'Done, 7 days'), stat(fmtDur(focus7), 'Focus, 7 days'), stat(String(streak), 'Day streak')));
+
+  const max = Math.max(1, ...doneCounts);
+  const bars = el('div', { class: 'bars', role: 'img',
+    'aria-label': 'Tasks completed per day, last 14 days: ' + days.map((k, i) => fmtDay(k) + ' ' + doneCounts[i]).join(', ') });
+  days.forEach((k, i) => {
+    const b = el('div', { class: doneCounts[i] ? '' : 'zero', title: fmtDay(k) + ': ' + doneCounts[i] + ' done' });
+    b.style.height = doneCounts[i] ? (doneCounts[i] / max * 100) + '%' : '2px';
+    bars.append(b);
+  });
+  frag.append(bars, el('div', { class: 'bars-label', 'aria-hidden': 'true' }, el('span', { text: fmtDay(days[0], { month: 'short', day: 'numeric' }) }), el('span', { text: 'Today' })));
+
+  const keys = Object.keys(store.days).filter(k => countDay(store.days[k]).total || store.days[k].focusSecs).sort().reverse();
+  if (!keys.length) {
+    frag.append(el('div', { class: 'empty-hint', text: 'Nothing logged yet. Completed tasks and focus time will show up here.' }));
+    return frag;
+  }
+  keys.forEach((k, idx) => {
+    const d = store.days[k], c = countDay(d);
+    const meta = c.done + '/' + c.total + ' tasks' + (d.focusSecs ? ' · ' + fmtDur(d.focusSecs) : '');
+    const body = el('div', { class: 'hist-body' });
+    d.sections.forEach(s => {
+      const tasks = s.tasks.filter(t => t.text.trim());
+      if (!tasks.length) return;
+      body.append(el('div', { class: 'hist-sec', text: s.title || 'Untitled' }));
+      tasks.forEach(t => body.append(el('div', { class: 'hist-task ' + (t.done ? 'done' : 'open') }, t.text,
+        t.done && t.doneAt ? el('time', { text: new Date(t.doneAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) }) : null)));
+    });
+    if (d.sessions) body.append(el('div', { class: 'hist-task open', text: d.sessions + ' focus session' + (d.sessions > 1 ? 's' : '') }));
+    const det = el('details', { class: 'hist-day' },
+      el('summary', {}, el('span', { text: k === today ? 'Today' : fmtDay(k) }), el('span', { text: meta })), body);
+    if (idx === 0) det.open = true;
+    frag.append(det);
+  });
+  return frag;
+}
+
+document.addEventListener('visibilitychange', () => { if (!document.hidden && renderedKey !== dateKey()) renderTasks(); });
+
+/* ---------- Persisted text fields ---------- */
+(function bindFields() {
+  const dist = document.getElementById('distractions'), desc = document.getElementById('sessionDesc');
+  dist.value = store.distractions || '';
+  desc.value = store.desc || '';
+  dist.addEventListener('input', () => { store.distractions = dist.value; saveStore(); });
+  desc.addEventListener('input', () => { store.desc = desc.value; saveStore(); });
+})();
+
+/* ---------- Stopwatch ---------- */
 let running = false, interval = null, sessionStart = null, elapsed = 0, startedAt = null;
+let cue20 = false, cue50 = false;
 let breakRunning = false, breakInterval = null, breakRemaining = 0, breakStartedAt = null, breakElapsed = 0;
 const activities = [
   "Go for a short walk outside",
@@ -243,38 +611,56 @@ const activities = [
 ];
 let activityIdx = Math.floor(Math.random() * activities.length);
 
-function pad(n) { return String(n).padStart(2, '0'); }
+function runningSub() {
+  if (cue50) return '50 min. Time to end and take your break.';
+  if (cue20) return '20 min reached. End whenever you are ready.';
+  return 'Session in progress';
+}
 
 function updateDisplay() {
   const total = running ? elapsed + (Date.now() - startedAt) : elapsed;
-  const ms = Math.floor(total / 1000);
-  const h = Math.floor(ms / 3600), m = Math.floor((ms % 3600) / 60), s = ms % 60;
-  document.getElementById('timer').textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+  const secs = Math.floor(total / 1000);
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+  const disp = document.getElementById('timer');
+  disp.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+  disp.classList.toggle('cue-min', secs >= 1200 && secs < 3000);
+  disp.classList.toggle('cue-max', secs >= 3000);
+  if (running) {
+    if (secs >= 1200 && !cue20) { cue20 = true; chime(1); document.getElementById('timerSub').textContent = runningSub(); }
+    if (secs >= 3000 && !cue50) {
+      cue50 = true; chime(2);
+      notify('50 minutes', 'Time to end the session and take your break.');
+      document.getElementById('timerSub').textContent = runningSub();
+    }
+  }
+  if (sessionStart && !breakRunning) document.title = (running ? '' : 'Paused ') + fmtClock(secs) + ' · Focus';
+  else if (!sessionStart) document.title = BASE_TITLE;
 }
 
 function toggleTimer() {
   const btn = document.getElementById('startBtn');
+  unlockAudio(); askNotify();
   if (!running) {
     running = true;
     startedAt = Date.now();
     if (!sessionStart) {
       sessionStart = new Date();
-      document.getElementById('sessionLabel').textContent = 'Started at ' + sessionStart.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      document.getElementById('sessionLabel').textContent = 'Started at ' + sessionStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
     interval = setInterval(updateDisplay, 500);
     btn.textContent = 'Pause';
     btn.classList.add('running');
     document.getElementById('endBtn').disabled = false;
-    document.getElementById('timerSub').textContent = 'Session in progress';
+    document.getElementById('timerSub').textContent = runningSub();
   } else {
     running = false;
     elapsed += Date.now() - startedAt;
     clearInterval(interval);
-    updateDisplay();
     btn.textContent = 'Resume';
     btn.classList.remove('running');
     document.getElementById('timerSub').textContent = 'Paused';
   }
+  updateDisplay();
 }
 
 function endSession() {
@@ -290,15 +676,23 @@ function endSession() {
   document.getElementById('startBtn').classList.remove('running');
 
   const workSecs = Math.floor(elapsed / 1000);
+  if (workSecs > 0) {
+    const d = getDay(dateKey(), true);
+    d.focusSecs = (d.focusSecs || 0) + workSecs;
+    d.sessions = (d.sessions || 0) + 1;
+    saveStore();
+    if (view === 'history') renderTasks();
+  }
+
   const breakSecs = Math.round(workSecs / 3);
   breakRemaining = breakSecs;
   breakElapsed = 0;
-
   const bm = Math.floor(breakSecs / 60), bs = breakSecs % 60;
   document.getElementById('timerSub').textContent = 'Session ended';
   document.getElementById('breakTimer').textContent = pad(bm) + ':' + pad(bs);
   document.getElementById('breakActivity').textContent = '→ ' + activities[activityIdx];
   document.getElementById('breakPanel').classList.add('visible');
+  document.title = 'Break ready · Focus';
 }
 
 function updateBreakDisplay() {
@@ -306,17 +700,24 @@ function updateBreakDisplay() {
   const remaining = Math.max(0, breakRemaining - spent);
   const bm = Math.floor(remaining / 60), bs = remaining % 60;
   document.getElementById('breakTimer').textContent = pad(bm) + ':' + pad(bs);
+  document.title = 'Break ' + pad(bm) + ':' + pad(bs) + ' · Focus';
   if (remaining <= 0) {
     clearInterval(breakInterval);
     breakRunning = false;
+    breakElapsed = breakRemaining;
     document.getElementById('breakStartBtn').textContent = 'Break done!';
     document.getElementById('breakActivity').textContent = 'Break over - great work.';
+    document.title = 'Break over · Focus';
+    chime(3);
+    notify('Break over', 'Time to get back to it.');
   }
 }
 
 function toggleBreak() {
   const btn = document.getElementById('breakStartBtn');
+  unlockAudio(); askNotify();
   if (!breakRunning) {
+    if (breakRemaining - breakElapsed <= 0) return;
     breakRunning = true;
     breakStartedAt = Date.now();
     breakInterval = setInterval(updateBreakDisplay, 500);
@@ -338,11 +739,13 @@ function resetAll() {
   running = false; breakRunning = false;
   clearInterval(interval); clearInterval(breakInterval);
   elapsed = 0; startedAt = null; sessionStart = null;
+  cue20 = false; cue50 = false;
   breakRemaining = 0; breakElapsed = 0; breakStartedAt = null;
   updateDisplay();
-  document.getElementById('startBtn').disabled = false;
-  document.getElementById('startBtn').textContent = 'Start';
-  document.getElementById('startBtn').classList.remove('running');
+  const start = document.getElementById('startBtn');
+  start.textContent = 'Start';
+  start.classList.remove('running');
+  start.disabled = true;
   document.getElementById('endBtn').disabled = true;
   document.getElementById('timerSub').textContent = '';
   document.getElementById('sessionLabel').textContent = '';
@@ -352,16 +755,16 @@ function resetAll() {
   document.querySelectorAll('.prereq-check').forEach(cb => cb.checked = false);
   document.getElementById('checklistCount').textContent = '0';
   document.getElementById('checklistHint').textContent = 'Check all items to enable Start.';
-  document.getElementById('startBtn').disabled = true;
 }
 
+/* ---------- Guidelines and checklist ---------- */
 function toggleDropdown() {
   const open = document.getElementById('dropdown').classList.toggle('open');
   document.getElementById('dropdownBackdrop').classList.toggle('open');
   document.getElementById('guidelinesBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
   const wrap = document.querySelector('.guidelines-wrap');
   const dropdown = document.getElementById('dropdown');
   if (!wrap.contains(e.target) && !dropdown.contains(e.target)) {
@@ -383,8 +786,9 @@ function updateChecklist() {
   document.getElementById('checklistCount').textContent = checked;
   const allChecked = checked === boxes.length;
   document.getElementById('checklistHint').textContent = allChecked ? 'All set - you can start.' : 'Check all items to enable Start.';
-  if (!document.getElementById('startBtn').classList.contains('running') && document.getElementById('startBtn').textContent !== 'Done' && document.getElementById('startBtn').textContent !== 'Pause') {
-    document.getElementById('startBtn').disabled = !allChecked;
-  }
+  // Gate only before a session begins, so unchecking mid-session never locks Resume.
+  if (!sessionStart) document.getElementById('startBtn').disabled = !allChecked;
 }
+
+renderTasks();
 </script>
