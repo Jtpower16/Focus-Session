@@ -176,6 +176,7 @@ textarea:focus { border-color: var(--accent); }
 .break-panel.visible { display: block; }
 .break-title { font-size: 12px; font-weight: 500; color: var(--accent-strong); margin-bottom: 4px; }
 .break-timer { font-family: var(--font-mono); font-size: 21px; font-weight: 500; color: var(--accent-strong); font-variant-numeric: tabular-nums; margin-bottom: 8px; }
+.break-timer.over { color: var(--red-strong); }
 .break-activity { font-size: 12px; color: var(--accent-strong); margin-bottom: 8px; opacity: 0.9; min-height: 16px; }
 .break-btns { display: flex; gap: 6px; }
 .break-btns button { flex: 1; padding: 7px; border-radius: var(--radius); font-size: 12px; cursor: pointer; background: var(--panel); color: var(--ink); border: 1px solid var(--line); }
@@ -193,6 +194,40 @@ textarea:focus { border-color: var(--accent); }
 .checklist-item input { cursor: pointer; margin-top: 2px; }
 .checklist-hint { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
 
+/* Character */
+.char-select { font-family: var(--font-body); font-size: 12px; color: var(--ink); background: var(--paper); border: 1px solid var(--line-strong); border-radius: 8px; padding: 5px 8px; cursor: pointer; }
+.char-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.char-stage { position: relative; width: 144px; height: 150px; margin: 2px auto 10px; }
+.char-shadow { position: absolute; left: 30px; right: 30px; bottom: 0; height: 10px; border-radius: 50%; background: var(--line); }
+.char-sprite { position: absolute; left: 0; top: 0; width: 144px; height: 144px; }
+.char-grid { position: absolute; left: 0; display: grid; grid-template-columns: repeat(24, 6px); grid-auto-rows: 6px; }
+.char-grid.bottom { top: 114px; }
+.char-grid.top { top: 0; animation: charBob 2.4s steps(1, end) infinite; }
+@keyframes charBob { 0% { transform: translateY(0); } 50%, 100% { transform: translateY(6px); } }
+.px-blink { animation: charBlink 5.2s linear infinite; }
+@keyframes charBlink { 0%, 93% { background-color: #221c2b; } 94%, 97% { background-color: #f3c7a1; } 98%, 100% { background-color: #221c2b; } }
+.px-glow { animation: charGlow 2.6s ease-in-out infinite; }
+@keyframes charGlow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.5); } }
+.char-sprite.lvl-up { animation: charUp 0.9s ease-out; }
+@keyframes charUp { 0% { transform: translateY(0); filter: brightness(1.8); } 30% { transform: translateY(-8px); } 100% { transform: translateY(0); filter: brightness(1); } }
+.char-sprite.lvl-down { animation: charDown 0.5s ease-out; }
+@keyframes charDown { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.char-level { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; column-gap: 8px; row-gap: 2px; }
+.char-level strong { font-family: var(--font-display); font-weight: 600; font-size: 17px; white-space: nowrap; }
+.char-level span { font-size: 11.5px; color: var(--ink-faint); font-family: var(--font-mono); white-space: nowrap; }
+.char-gear { font-size: 12.5px; color: var(--ink-soft); margin: 2px 0 10px; min-height: 18px; }
+.pips { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 6px; }
+.pips div { height: 6px; border-radius: 99px; background: var(--line); }
+.pips div.on { background: var(--accent); }
+.char-next { font-size: 12px; color: var(--ink-soft); min-height: 16px; }
+.char-head-right { display: flex; align-items: center; gap: 6px; }
+.char-mini { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+.char-card:not(.min) .char-mini { display: none; }
+.char-card.min .char-select, .char-card.min #charBody { display: none; }
+.char-card.min .card-head { margin-bottom: 0; }
+#charToggle svg { transition: transform 0.15s; }
+.char-card.min #charToggle svg { transform: rotate(-90deg); }
+
 @media (max-width: 560px) {
   .app { padding: 1.5rem 1rem 2.5rem; }
   .grid { grid-template-columns: 1fr; }
@@ -201,7 +236,10 @@ textarea:focus { border-color: var(--accent); }
   .guidelines-wrap { grid-column: 2; }
   .task-list { padding-left: 22px; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  .char-grid.top, .px-blink, .px-glow, .char-sprite { animation: none !important; }
+}
 </style>
 
 <div class="app">
@@ -299,7 +337,37 @@ textarea:focus { border-color: var(--accent); }
       <textarea id="distractions" rows="9" placeholder="Capture distracting thoughts here - deal with them later."></textarea>
     </div>
 
-    <div class="card card-wide">
+    <div class="card char-card" id="charCard">
+      <div class="card-head">
+        <div class="card-label">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"></path></svg>
+          Character
+        </div>
+        <div class="char-head-right">
+          <span class="char-mini" id="charMini"></span>
+          <label for="charClass" class="sr-only">Class</label>
+          <select id="charClass" class="char-select"></select>
+          <button class="icon-btn" id="charToggle" aria-expanded="true" aria-controls="charBody" aria-label="Minimize character" title="Minimize character">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        </div>
+      </div>
+      <div id="charBody">
+      <div class="char-stage">
+        <div class="char-shadow"></div>
+        <div class="char-sprite" id="charSprite" role="img" aria-label="Character">
+          <div class="char-grid bottom" id="charBottom"></div>
+          <div class="char-grid top" id="charTop"></div>
+        </div>
+      </div>
+      <div class="char-level"><strong id="charTier">Start of week</strong><span id="charCount">0 done this week</span></div>
+      <div class="char-gear" id="charGear"></div>
+      <div class="pips" id="charPips" aria-hidden="true"></div>
+      <div class="char-next" id="charNext" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="card-label">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l11-2v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="17" cy="16" r="3"></circle></svg>
         Brain.fm
@@ -424,9 +492,11 @@ function renderTasks() {
     if (t) t.focus();
     focusAfter = null;
   }
+  Character.update();
 }
 
 function updateCounts() {
+  Character.update();
   const day = getDay(dateKey(), false);
   const c = countDay(day);
   const dc = document.getElementById('dayCount');
@@ -511,7 +581,7 @@ function renderSection(sec) {
     const row = el('div', { class: 'task' + (t.done ? ' done' : '') });
     row.append(
       el('input', { type: 'checkbox', checked: t.done, 'aria-label': 'Mark done',
-        onchange: e => { t.done = e.target.checked; t.doneAt = t.done ? Date.now() : null; saveStore(); row.classList.toggle('done', t.done); updateCounts(); } }),
+        onchange: e => { unlockAudio(); t.done = e.target.checked; t.doneAt = t.done ? Date.now() : null; saveStore(); row.classList.toggle('done', t.done); updateCounts(); } }),
       el('input', { class: 'plain-input', value: t.text, 'aria-label': 'Task',
         oninput: e => { t.text = e.target.value; saveStore(); updateCounts(); },
         onkeydown: e => { if (e.key === 'Enter') { e.preventDefault(); const a = list.querySelector('[data-add]'); if (a) a.focus(); } } }),
@@ -597,6 +667,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && re
 let running = false, interval = null, sessionStart = null, elapsed = 0, startedAt = null;
 let cue20 = false, cue50 = false;
 let breakRunning = false, breakInterval = null, breakRemaining = 0, breakStartedAt = null, breakElapsed = 0;
+let breakOverNotified = false, breakDone = false;
 const activities = [
   "Go for a short walk outside",
   "Doodle or sketch something",
@@ -687,6 +758,8 @@ function endSession() {
   const breakSecs = Math.round(workSecs / 3);
   breakRemaining = breakSecs;
   breakElapsed = 0;
+  breakOverNotified = false; breakDone = false;
+  document.getElementById('breakTimer').classList.remove('over');
   const bm = Math.floor(breakSecs / 60), bs = breakSecs % 60;
   document.getElementById('timerSub').textContent = 'Session ended';
   document.getElementById('breakTimer').textContent = pad(bm) + ':' + pad(bs);
@@ -695,29 +768,54 @@ function endSession() {
   document.title = 'Break ready · Focus';
 }
 
+function breakSpent() {
+  return breakRunning ? breakElapsed + Math.floor((Date.now() - breakStartedAt) / 1000) : breakElapsed;
+}
+function fmtMS(secs) { const m = Math.floor(secs / 60), s = secs % 60; return m ? m + ' min ' + s + ' s' : s + ' s'; }
+
+// Counts down the planned break, then keeps counting up so you can see how far over you went.
 function updateBreakDisplay() {
-  const spent = breakRunning ? breakElapsed + Math.floor((Date.now() - breakStartedAt) / 1000) : breakElapsed;
-  const remaining = Math.max(0, breakRemaining - spent);
-  const bm = Math.floor(remaining / 60), bs = remaining % 60;
-  document.getElementById('breakTimer').textContent = pad(bm) + ':' + pad(bs);
-  document.title = 'Break ' + pad(bm) + ':' + pad(bs) + ' · Focus';
-  if (remaining <= 0) {
-    clearInterval(breakInterval);
-    breakRunning = false;
-    breakElapsed = breakRemaining;
-    document.getElementById('breakStartBtn').textContent = 'Break done!';
-    document.getElementById('breakActivity').textContent = 'Break over - great work.';
-    document.title = 'Break over · Focus';
-    chime(3);
-    notify('Break over', 'Time to get back to it.');
+  const left = breakRemaining - breakSpent();
+  const timer = document.getElementById('breakTimer');
+  if (left > 0) {
+    const t = pad(Math.floor(left / 60)) + ':' + pad(left % 60);
+    timer.textContent = t;
+    timer.classList.remove('over');
+    document.title = 'Break ' + t + ' · Focus';
+    return;
   }
+  const over = -left, t = '+' + pad(Math.floor(over / 60)) + ':' + pad(over % 60);
+  timer.textContent = t;
+  timer.classList.add('over');
+  document.title = t + ' over break · Focus';
+  document.getElementById('breakActivity').textContent = 'Break is over. Running ' + fmtMS(over) + ' long so far.';
+  if (!breakOverNotified) {
+    breakOverNotified = true;
+    document.getElementById('breakStartBtn').textContent = "I'm back";
+    chime(3);
+    notify('Break over', 'Time to get back to it. The app is now tracking how long you go over.');
+  }
+}
+
+function finishBreak() {
+  breakElapsed = breakSpent();
+  breakRunning = false;
+  breakDone = true;
+  clearInterval(breakInterval);
+  const over = breakElapsed - breakRemaining;
+  document.getElementById('breakStartBtn').textContent = 'Break done';
+  document.getElementById('breakActivity').textContent = over > 0
+    ? 'Break ran ' + fmtMS(over) + ' over the planned ' + fmtMS(breakRemaining) + '.'
+    : 'Back on time. Nice work.';
+  document.title = 'Break done · Focus';
 }
 
 function toggleBreak() {
   const btn = document.getElementById('breakStartBtn');
   unlockAudio(); askNotify();
+  if (breakDone) return;
+  if (breakRunning && breakSpent() >= breakRemaining) { finishBreak(); return; }
   if (!breakRunning) {
-    if (breakRemaining - breakElapsed <= 0) return;
     breakRunning = true;
     breakStartedAt = Date.now();
     breakInterval = setInterval(updateBreakDisplay, 500);
@@ -741,6 +839,8 @@ function resetAll() {
   elapsed = 0; startedAt = null; sessionStart = null;
   cue20 = false; cue50 = false;
   breakRemaining = 0; breakElapsed = 0; breakStartedAt = null;
+  breakOverNotified = false; breakDone = false;
+  document.getElementById('breakTimer').classList.remove('over');
   updateDisplay();
   const start = document.getElementById('startBtn');
   start.textContent = 'Start';
@@ -756,6 +856,203 @@ function resetAll() {
   document.getElementById('checklistCount').textContent = '0';
   document.getElementById('checklistHint').textContent = 'Check all items to enable Start.';
 }
+
+/* ---------- Character ---------- */
+// Levels up one tier for every 2 fully finished sections this week (Mon-Sun); unchecking a task drops it back.
+const Character = (function () {
+  const N = 24, SPLIT = 19, PER_TIER = 2;
+  const TIERS = ['Start of week', 'Tier 1', 'Tier 2', 'Max'];
+  const START_GEAR = 'Tunic and a training stick', T1_GEAR = 'Leather boots and gloves';
+  const PAL0 = {
+    K: '#221c2b', s: '#f3c7a1', z: '#d89f7c', h: '#6b4226',
+    b: '#5a3a22', p: '#4b5170', q: '#3a3f58', n: '#6b4a2e',
+    l: '#8f5d36', m: '#6a4227', X: '#9c6b3c', x: '#6b4a2e'
+  };
+  const BASE = [
+    '2,9:KKKKKK', '3,8:KhhhhhhK', '4,7:KhhhhhhhhK', '5,6:KhhhhhhhhhhK',
+    '6,6:KhhsssssshhK', '7,6:KhsssssssshK', '8-9,6:KhsKssssKshK', '10,6:KzsssssssszK',
+    '11,7:KzsssssszK', '12,7:KKKKzzKKKK', '13-15,5:KuuttttttttuuK', '16,5:KssbbbbbbbbssK',
+    '17,6:KKttttttttKK', '18,7:KuttttttuK', '19-20,7:KppqKKqppK', '21,7:KnnnKKnnnK',
+    '22,6:KnnnnKKnnnnK', '23,6:KKKKKKKKKKKK'
+  ];
+  const EYES = { 201: 1, 225: 1, 206: 1, 230: 1 }; // r*24+c for (8,9) (9,9) (8,14) (9,14)
+  const STICK = ['6,20:KK', '7-21,19:KXxK', '16,18:FFFFK', '22,20:KK'];
+  const T1 = ['15,6:ll........ll', '16,6:mm........mm', '16,11:GG', '20,8:mmm..mmm', '21,8:lll..lll', '22,7:llll..llll'];
+  const CAPE = ['13-22,4:KcCCCCCCCCCCCCcK', '23,4:KKKKKKKKKKKKKKKK'];
+  const HELM = ['3,8:KLAAAAaK', '4,7:KLAAAAAAaK', '5,6:KLAAAAAAAAaK', '6,6:KAAGGGGGGAaK', '7,6:KAa......aAK', '8-10,6:KA........AK'];
+  const PAULDRONS = ['12,4:KKKK', '12,16:KKKK', '13,4:KLAA', '13,16:AALK', '14,4:KAaa', '14,16:aaAK', '15,4:K', '15,19:K'];
+  const CHEST = ['13,8:aAALLAAa', '14,8:aAAGGAAa', '15,8:aaAAAAaa'];
+  const ARMOR_T2 = HELM.concat(PAULDRONS, CHEST);
+  const ARMOR_T3 = ['13,8:G', '13,15:G', '16,8:aaaGGaaa', '17,8:aAAGGAAa', '18,8:aAaAAaAa', '19,8:AAa..aAA', '20,8:GGg..gGG', '21,8:AAa..aAA', '22,7:LAAa..aAAL'];
+  const SWORD = ['3,20:KK', '4-14,19:KWwK', '15,18:KGGGGK', '16,18:FFFFK', '17,19:KXXK', '18,19:KGGK', '19,20:KK'];
+  const MAGE_T2 = [
+    '3,8:KLAAAAaK', '4,7:KLAAAAAAaK', '5,6:KLAAAAAAAAaK', '6,6:KLAAAAAAAAaK', '7-10,6:KAa......aAK',
+    '12,5:KAAAAAAAAAAAAK', '13-15,6:AA........AA', '13-15,8:aAAGGAAa', '16,8:GGGYYGGG',
+    '17-18,7:KaAAGGAAaK', '19-20,6:KaAAAGGAAAaK', '21,6:KGGGGGGGGGGK'
+  ];
+  const MAGE_T3 = [
+    '0,14:KK', '1,12:KAK', '2,9:KAAAaK', '3,8:KAAAAAaK', '3,11:Y',
+    '4,7:KaGGGGGGaK', '5,5:KAAAAAAAAAAAAK', '6,6:KaaaaaaaaaaK',
+    '12,5:KGGGGGGGGGGGGK', '15,6:GG........GG'
+  ];
+  const STAFF = ['4,20:KK', '5,19:KYYK', '6,20:KK', '7-21,19:KXxK', '16,18:FFFFK', '22,20:KK'];
+  const ORB_STAFF = ['2,19:KKKK', '3,18:KYWYYK', '4-5,18:KYYYyK', '6,18:KyyyyK', '7,19:KKKK', '8-21,19:KXxK', '16,18:FFFFK', '22,20:KK'];
+  const SHAMAN_T2 = ['6,7:aGGGGGGGGa'].concat(PAULDRONS, ['13,8:aAAGGAAa', '14,8:aAAAAAAa', '15,8:aaAAAAaa']);
+  const SHAMAN_T3 = ['0,5:G..G', '1,5:G.G', '2,6:GG', '3,7:G', '0,15:G..G', '1,16:G.G', '2,16:GG', '3,16:G', '6,11:YY', '15,6:GG........GG', '16,8:aGaGGaGa', '17,8:aAAGGAAa', '18,8:aAaAAaAa'];
+  const TOTEM = ['4,19:KKKK', '5,19:KGGK', '6,19:KGgK', '7-21,19:KXxK', '16,18:FFFFK', '22,20:KK'];
+  const SPIRIT_TOTEM = ['2,19:KKKK', '3,18:KGGGGK', '4,18:KYGGYK', '5,18:KGGGGK', '6,18:KgGGgK', '7,19:KKKK', '8-21,19:KXxK', '16,18:FFFFK', '22,20:KK', '9,23:C', '10,23:c', '11,23:C'];
+  const ARMOR_GEAR2 = 'Helm, chestplate, pauldrons, sword';
+
+  const CLASSES = [
+    { id: 'warrior', name: 'Warrior', glow: '',
+      pal: { t: '#6f8f4e', u: '#557039', A: '#b9c3cd', a: '#7f8a96', L: '#eef3f7', G: '#c99a3a', g: '#8f6a22', C: '#b23a3a', c: '#7a2626', W: '#e3e9ef', w: '#9aa6b4', Y: '#e04848', y: '#9c2f2f' },
+      t2: ARMOR_T2, w2: SWORD, gear2: ARMOR_GEAR2,
+      t3: ARMOR_T3.concat(['0,10:KKKK', '1,9:KYYYyK', '2,10:YYyy', '7-8,11:aa', '15,2:KKKK', '16,1:KGGGGK', '17-19,1:KGCCGK', '18,3:LL', '20,1:KGGGGK', '21,2:KKKK']),
+      w3: ['1,20:KK', '2-14,19:KWwK', '15,18:KGYYGK', '16,18:FFFFK', '17,19:KXXK', '18,19:KGGK', '19,20:KK'],
+      gear3: 'Plumed helm, red cape, longsword, round shield' },
+    { id: 'paladin', name: 'Paladin', glow: 'Yy',
+      pal: { t: '#4f79b8', u: '#3a5d91', A: '#ece5cf', a: '#b8ad8d', L: '#fffbef', G: '#e0b03c', g: '#a67a1c', C: '#2f5fa8', c: '#1f3f74', W: '#e3e9ef', w: '#9aa6b4', Y: '#7fd3ff', y: '#3a9bd1' },
+      t2: ARMOR_T2, w2: SWORD, gear2: ARMOR_GEAR2,
+      t3: ARMOR_T3.concat(['2,4:KK', '3,3:KLLLK', '4,3:KLGK', '5,4:KG', '2,18:KK', '3,16:KLLLK', '4,17:KGLK', '5,18:GK', '6,11:YY', '7-8,11:aa', '14,11:YY']),
+      w3: ['7,18:KKKKKK', '8,18:KGLLGK', '9,18:KGAAGK', '10,18:KGaaGK', '11,18:KKKKKK', '12-15,19:KXXK', '16,18:FFFFK', '17-19,19:KXXK', '20,19:KGGK', '21,19:KKKK'],
+      gear3: 'Winged helm, blue cape, warhammer, glowing gems' },
+    { id: 'mage', name: 'Mage', glow: 'YyW',
+      pal: { t: '#8a6f9e', u: '#6d5680', A: '#4a5fc1', a: '#33449a', L: '#7d8fe0', G: '#e2b84a', g: '#a8842c', C: '#2c2a5a', c: '#1c1a3e', W: '#e9ffff', w: '#9fdbe6', Y: '#8ff0ff', y: '#3fc3d9' },
+      t2: MAGE_T2, w2: STAFF, gear2: 'Hooded robe and apprentice staff',
+      t3: MAGE_T3, w3: ORB_STAFF, gear3: 'Wizard hat, gold mantle, cloak, orb staff' },
+    { id: 'shaman', name: 'Shaman', glow: 'Yy',
+      pal: { t: '#9b7b4f', u: '#7a5f3a', A: '#8a6a4a', a: '#654a30', L: '#c9a77a', G: '#e8dcc0', g: '#b9a988', C: '#4f7a3a', c: '#365a27', W: '#e8dcc0', w: '#b9a988', Y: '#9df29a', y: '#4fc46a' },
+      t2: SHAMAN_T2, w2: TOTEM, gear2: 'Bone headband, fur shoulders, hide vest, totem',
+      t3: SHAMAN_T3, w3: SPIRIT_TOTEM, gear3: 'Antler crown, green cloak, spirit totem' },
+    { id: 'darkknight', name: 'Dark Knight', glow: 'Yy',
+      pal: { t: '#6b5f86', u: '#514769', A: '#4b4b61', a: '#2f2f3e', L: '#7c7a98', G: '#8d6bd1', g: '#5e4596', C: '#2b2440', c: '#1a1626', W: '#b9b4d8', w: '#7b759e', Y: '#b69bff', y: '#7a5fd6' },
+      t2: ARMOR_T2, w2: SWORD, gear2: ARMOR_GEAR2,
+      t3: ARMOR_T3.concat(['0,5:K', '1,5:KGK', '2,6:KGK', '3,6:KG', '0,18:K', '1,16:KGK', '2,15:KGK', '3,16:GK', '7,8:aAAAAAAa', '8,8:AYyAAyYA', '9-10,8:aAAAAAAa', '11,8:aaaaaaaa']),
+      w3: ['0,19:KWK', '1-12,18:KWwwK', '4,18:KWYwK', '8,18:KWYwK', '13,17:KGGGGGK', '14-15,19:KXK', '16,18:FFFFK', '17,19:KYK', '18,19:KKK'],
+      gear3: 'Horned helm, glowing visor, cape, rune greatsword' }
+  ];
+
+  function paint(g, patches, behind) {
+    patches.forEach(p => {
+      const i = p.indexOf(':'), str = p.slice(i + 1), rc = p.slice(0, i).split(',');
+      const rr = rc[0].split('-').map(Number), c0 = Number(rc[1]);
+      for (let r = rr[0]; r <= (rr[1] ?? rr[0]); r++) {
+        for (let j = 0; j < str.length; j++) {
+          const ch = str[j], c = c0 + j;
+          if (ch === '.' || r < 0 || r >= N || c < 0 || c >= N) continue;
+          if (behind && g[r][c] !== '.') continue;
+          g[r][c] = ch;
+        }
+      }
+    });
+  }
+
+  function build(k, stage) {
+    const g = Array.from({ length: N }, () => Array(N).fill('.'));
+    paint(g, BASE);
+    if (stage === 3) paint(g, CAPE, true);
+    if (stage >= 1) paint(g, T1);
+    if (stage >= 2) paint(g, k.t2);
+    if (stage === 3) paint(g, k.t3);
+    paint(g, stage <= 1 ? STICK : (stage === 2 ? k.w2 : k.w3));
+    const pal = Object.assign({}, PAL0, k.pal, { F: stage >= 1 ? PAL0.m : PAL0.s });
+    const top = [], bottom = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const ch = g[r][c];
+      let cls = '';
+      if (ch === 'K' && EYES[r * N + c]) cls = 'px-blink';
+      else if (ch !== '.' && k.glow.includes(ch)) cls = 'px-glow';
+      (r < SPLIT ? top : bottom).push({ bg: ch === '.' ? 'transparent' : (pal[ch] || 'transparent'), cls });
+    }
+    return { top, bottom };
+  }
+
+  function fill(box, cells) {
+    const frag = document.createDocumentFragment();
+    cells.forEach(c => {
+      const d = document.createElement('div');
+      d.style.background = c.bg;
+      if (c.cls) d.className = c.cls;
+      frag.append(d);
+    });
+    box.replaceChildren(frag);
+  }
+
+  // A section counts only when it has tasks and every one of them is checked.
+  function weekSections() {
+    const d = new Date();
+    d.setDate(d.getDate() - (d.getDay() + 6) % 7); // back to Monday
+    const ws = dateKey(d), today = dateKey();
+    let n = 0;
+    Object.keys(store.days).forEach(key => {
+      if (key < ws || key > today) return;
+      store.days[key].sections.forEach(s => { const c = countSec(s); if (c.total && c.done === c.total) n++; });
+    });
+    return n;
+  }
+
+  function applyMin() {
+    const min = !!store.charMin, btn = document.getElementById('charToggle');
+    document.getElementById('charCard').classList.toggle('min', min);
+    btn.setAttribute('aria-expanded', String(!min));
+    btn.setAttribute('aria-label', min ? 'Show character' : 'Minimize character');
+    btn.title = min ? 'Show character' : 'Minimize character';
+  }
+
+  function current() { return CLASSES.find(c => c.id === store.charClass) || CLASSES[0]; }
+
+  let last = null, flash = '', flashTimer = null;
+
+  function update() {
+    const topBox = document.getElementById('charTop');
+    if (!topBox) return;
+    const k = current(), done = weekSections();
+    const level = Math.min(TIERS.length - 1, Math.floor(done / PER_TIER));
+    if (!last || last.id !== k.id || last.level !== level) {
+      const sp = build(k, level);
+      fill(topBox, sp.top);
+      fill(document.getElementById('charBottom'), sp.bottom);
+      if (last && last.id === k.id) {
+        const up = level > last.level, box = document.getElementById('charSprite');
+        box.classList.remove('lvl-up', 'lvl-down');
+        void box.offsetWidth; // restart the animation
+        box.classList.add(up ? 'lvl-up' : 'lvl-down');
+        if (up && !store.charMin) chime(2);
+        flash = up ? 'Level up!' : 'Gear lost.';
+        clearTimeout(flashTimer);
+        flashTimer = setTimeout(() => { flash = ''; update(); }, 2500);
+      }
+      last = { id: k.id, level };
+    }
+    const gear = [START_GEAR, T1_GEAR, k.gear2, k.gear3][level];
+    document.getElementById('charTier').textContent = TIERS[level] + ' · ' + k.name;
+    document.getElementById('charCount').textContent = done + ' section' + (done === 1 ? '' : 's') + ' this week';
+    document.getElementById('charMini').textContent = TIERS[level] + ' · ' + k.name;
+    document.getElementById('charGear').textContent = gear;
+    document.getElementById('charSprite').setAttribute('aria-label', k.name + ', ' + TIERS[level] + ': ' + gear);
+    const pips = document.getElementById('charPips'), total = PER_TIER * (TIERS.length - 1);
+    if (pips.children.length !== total) pips.replaceChildren(...Array.from({ length: total }, () => document.createElement('div')));
+    Array.from(pips.children).forEach((p, i) => p.classList.toggle('on', i < done));
+    let next = 'Max gear. Resets Monday.';
+    if (level < TIERS.length - 1) {
+      const need = (level + 1) * PER_TIER - done;
+      next = 'Finish ' + need + ' more section' + (need > 1 ? 's' : '') + ' to reach ' + TIERS[level + 1];
+    }
+    document.getElementById('charNext').textContent = flash ? flash + ' ' + next : next;
+  }
+
+  function init() {
+    const sel = document.getElementById('charClass');
+    CLASSES.forEach(c => sel.append(new Option(c.name, c.id)));
+    sel.value = current().id;
+    sel.addEventListener('change', () => { store.charClass = sel.value; saveStore(); update(); });
+    document.getElementById('charToggle').addEventListener('click', () => { store.charMin = !store.charMin; saveStore(); applyMin(); });
+    applyMin();
+    update();
+  }
+
+  return { init, update };
+})();
 
 /* ---------- Guidelines and checklist ---------- */
 function toggleDropdown() {
@@ -790,5 +1087,6 @@ function updateChecklist() {
   if (!sessionStart) document.getElementById('startBtn').disabled = !allChecked;
 }
 
+Character.init();
 renderTasks();
 </script>
