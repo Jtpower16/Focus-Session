@@ -138,7 +138,7 @@ textarea:focus { border-color: var(--accent); }
 .empty-hint { font-size: 12.5px; color: var(--ink-faint); margin-bottom: 8px; }
 
 /* History */
-.hist-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.hist-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
 .stat { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; }
 .stat b { display: block; font-family: var(--font-mono); font-size: 18px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
 .stat span { font-size: 10.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -221,6 +221,9 @@ textarea:focus { border-color: var(--accent); }
 .pips div.on { background: var(--accent); }
 .char-next { font-size: 12px; color: var(--ink-soft); min-height: 16px; }
 .char-head-right { display: flex; align-items: center; gap: 6px; }
+#charToggle { margin-left: 8px; margin-right: -6px; } /* equal space on both sides of the arrow */
+.dist-card { display: flex; flex-direction: column; }
+.dist-card textarea { flex: 1; min-height: 110px; }
 .char-mini { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
 .char-card:not(.min) .char-mini { display: none; }
 .char-card.min .char-select, .char-card.min #charBody { display: none; }
@@ -235,6 +238,7 @@ textarea:focus { border-color: var(--accent); }
   .header-title { grid-column: 1; text-align: left; }
   .guidelines-wrap { grid-column: 2; }
   .task-list { padding-left: 22px; }
+  .hist-stats { grid-template-columns: repeat(2, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
@@ -332,9 +336,9 @@ textarea:focus { border-color: var(--accent); }
       </div>
     </div>
 
-    <div class="card">
+    <div class="card dist-card">
       <div class="card-label"><label for="distractions">Distraction log</label></div>
-      <textarea id="distractions" rows="9" placeholder="Capture distracting thoughts here - deal with them later."></textarea>
+      <textarea id="distractions" rows="5" placeholder="Capture distracting thoughts here - deal with them later."></textarea>
     </div>
 
     <div class="card char-card" id="charCard">
@@ -608,6 +612,7 @@ function renderHistory() {
   const last7 = days.slice(-7);
   const done7 = last7.reduce((a, k) => a + countDay(store.days[k]).done, 0);
   const focus7 = last7.reduce((a, k) => a + ((store.days[k] && store.days[k].focusSecs) || 0), 0);
+  const over7 = last7.reduce((a, k) => a + ((store.days[k] && store.days[k].breakOverSecs) || 0), 0);
   let streak = 0;
   const cur = new Date();
   if (!countDay(store.days[today]).done) cur.setDate(cur.getDate() - 1);
@@ -615,7 +620,7 @@ function renderHistory() {
 
   const stat = (v, l) => el('div', { class: 'stat' }, el('b', { text: v }), el('span', { text: l }));
   frag.append(el('div', { class: 'hist-stats' },
-    stat(String(done7), 'Done, 7 days'), stat(fmtDur(focus7), 'Focus, 7 days'), stat(String(streak), 'Day streak')));
+    stat(String(done7), 'Done, 7 days'), stat(fmtDur(focus7), 'Focus, 7 days'), stat(over7 < 60 ? over7 + 's' : fmtDur(over7), 'Break over, 7 days'), stat(String(streak), 'Day streak')));
 
   const max = Math.max(1, ...doneCounts);
   const bars = el('div', { class: 'bars', role: 'img',
@@ -644,6 +649,7 @@ function renderHistory() {
         t.done && t.doneAt ? el('time', { text: new Date(t.doneAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) }) : null)));
     });
     if (d.sessions) body.append(el('div', { class: 'hist-task open', text: d.sessions + ' focus session' + (d.sessions > 1 ? 's' : '') }));
+    if (d.breaks) body.append(el('div', { class: 'hist-task open', text: d.breaks + ' break' + (d.breaks > 1 ? 's' : '') + (d.breakOverSecs ? ', ' + fmtMS(d.breakOverSecs) + ' over plan' : ', all on time') }));
     const det = el('details', { class: 'hist-day' },
       el('summary', {}, el('span', { text: k === today ? 'Today' : fmtDay(k) }), el('span', { text: meta })), body);
     if (idx === 0) det.open = true;
@@ -788,16 +794,26 @@ function updateBreakDisplay() {
   timer.textContent = t;
   timer.classList.add('over');
   document.title = t + ' over break · Focus';
-  document.getElementById('breakActivity').textContent = 'Break is over. Running ' + fmtMS(over) + ' long so far.';
   if (!breakOverNotified) {
     breakOverNotified = true;
     document.getElementById('breakStartBtn').textContent = "I'm back";
-    chime(3);
     notify('Break over', 'Time to get back to it. The app is now tracking how long you go over.');
   }
 }
 
+// Saves the break to today's stats: one more break, plus any time it ran over the plan.
+function recordBreak() {
+  const spent = breakSpent();
+  if (breakDone || spent <= 0) return;
+  const d = getDay(dateKey(), true);
+  d.breaks = (d.breaks || 0) + 1;
+  d.breakOverSecs = (d.breakOverSecs || 0) + Math.max(0, spent - breakRemaining);
+  saveStore();
+  if (view === 'history') renderTasks();
+}
+
 function finishBreak() {
+  recordBreak();
   breakElapsed = breakSpent();
   breakRunning = false;
   breakDone = true;
@@ -834,6 +850,7 @@ function nextActivity() {
 }
 
 function resetAll() {
+  recordBreak();
   running = false; breakRunning = false;
   clearInterval(interval); clearInterval(breakInterval);
   elapsed = 0; startedAt = null; sessionStart = null;
@@ -1025,7 +1042,7 @@ const Character = (function () {
       last = { id: k.id, level };
     }
     const gear = [START_GEAR, T1_GEAR, k.gear2, k.gear3][level];
-    document.getElementById('charTier').textContent = TIERS[level] + ' · ' + k.name;
+    document.getElementById('charTier').textContent = TIERS[level];
     document.getElementById('charCount').textContent = done + ' section' + (done === 1 ? '' : 's') + ' this week';
     document.getElementById('charMini').textContent = TIERS[level] + ' · ' + k.name;
     document.getElementById('charGear').textContent = gear;
